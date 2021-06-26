@@ -58,26 +58,26 @@ class User{
     
     public function signinAuth(){
         if(!$this->checkAvalUser()){
-            $pwd_q = "SELECT user_id, user_fname, user_lname, user_phone,
+            $pwd_q = "SELECT user_pwd, user_id, user_fname, user_lname, user_phone,
                              user_country, user_spec, gender_id, user_bdate,
                              join_date, user_about
-                    FROM ".$this->table." WHERE user_pwd = ? AND user_email = ?";
+                    FROM ".$this->table." WHERE user_email = ?";
             $stmt = $this->conn->prepare($pwd_q);
-            $this->password = password_hash($this->password, PASSWORD_DEFAULT);
-            $stmt->execute(array($this->password, $this->email));
+            $stmt->execute(array($this->email));
+            $res = $stmt->fetchAll(PDO::FETCH_NUM)[0];
+            $pwd_hash = $res[0];
             // set user props if records exist
-            if($this->countRows("user_pwd = '".$this->password."' AND user_email = '".$this->email."'") > 0){
-                $this->type = $stmt->fetch()[0];
-                $this->uid = $stmt->fetch()[1];
-                $this->fname = $stmt->fetch()[2];
-                $this->lname = $stmt->fetch()[3];
-                $this->phone = $stmt->fetch()[4];
-                $this->country = $stmt->fetch()[5];
-                $this->spec = $stmt->fetch()[6];
-                $this->gender = $stmt->fetch()[7] === 1 ? "Male" : "Female";
-                $this->bdate = $stmt->fetch()[8];
-                $this->join_date = $stmt->fetch()[9];
-                $this->about = $stmt->fetch()[10];
+            if(password_verify($this->password, $pwd_hash)){
+                $this->uid = $res[1];
+                $this->fname = $res[2];
+                $this->lname = $res[3];
+                $this->phone = $res[4];
+                $this->country = $res[5];
+                $this->spec = $res[6];
+                $this->gender = $res[7] === 1 ? "Male" : "Female";
+                $this->bdate = $res[8];
+                $this->join_date = $res[9];
+                $this->about = $res[10];
                 return true;
             }
             else{
