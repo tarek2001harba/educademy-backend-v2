@@ -23,15 +23,15 @@ class Student extends User{
     }
     
     public function signinAuth() {
-        parent::signinAuth();
-        $this->setSID();
-        return true;
+        $user_res = parent::signinAuth();
+        if($user_res){
+            $this->setSID();
+            return true;
+        }
+        return false;
     }
     // gets the added teacher id for further operatoins
     public function setSID(){
-        $sid_q = "SELECT student_id FROM ".$this->table." WHERE user_id = ?";
-        $sid_stmt = $this->conn->prepare($sid_q);
-        $sid_stmt->execute(array($this->uid));
-        $this->sid = $sid_stmt->fetch()[0];
+        $this->sid = $this->conn->lastInsertId();
     }
 }

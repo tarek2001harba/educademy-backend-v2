@@ -30,11 +30,9 @@ class Teacher extends User{
         }
         return false;
     }
+    
     // gets the added teacher id for further operatoins
     public function setTID(){
-        $tid_q = "SELECT teacher_id FROM ".$this->table." WHERE user_id = ?";
-        $tid_stmt = $this->conn->prepare($tid_q);
-        $tid_stmt->execute(array($this->uid));
-        $this->tid = $tid_stmt->fetch()[0];
+        $this->tid = $this->conn->lastInsertId();
     }
 }

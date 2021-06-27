@@ -47,10 +47,9 @@ class User{
             ));
 
             // gets the added user id for further operatoins
-            $uid_q = "SELECT user_id FROM `".$this->table."` WHERE user_email = ? ";
-            $uid_stmt = $this->conn->prepare($uid_q);
-            $uid_stmt->execute(array($this->email));
-            $this->uid = $uid_stmt->fetch()[0];
+            $this->uid = $this->conn->lastInsertId();
+            // gets and sets join_date
+            $this->getJoinDate();
             return true;
         } 
         return false;
@@ -64,7 +63,7 @@ class User{
                     FROM ".$this->table." WHERE user_email = ?";
             $stmt = $this->conn->prepare($pwd_q);
             $stmt->execute(array($this->email));
-            $res = $stmt->fetchAll(PDO::FETCH_NUM)[0];
+            $res = $stmt->fetch(PDO::FETCH_NUM);
             $pwd_hash = $res[0];
             // set user props if records exist
             if(password_verify($this->password, $pwd_hash)){
@@ -106,6 +105,12 @@ class User{
         return intval($count);
     }
     
+    public function getJoinDate(){
+        $q = "SELECT join_date FROM ".$this->table." WHERE user_id = ?";
+        $stmt = $this->conn->prepare($q);
+        $stmt->execute(array($this->uid));
+        $this->join_date = $stmt->fetch()[0];
+    }
     // getters
     public function getUID(){
         return $this->uid;
