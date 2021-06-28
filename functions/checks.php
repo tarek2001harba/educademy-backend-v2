@@ -54,15 +54,3 @@ function checkSigninAuth($create_res, $object){
     }
 }
 
-function check_create_course($create_res){
-    if($create_res === true){
-        http_response_code(201);
-        $udata = array(
-                "message" => "Course Created Successfully."
-        );
-    }
-    else{
-        http_response_code(503);
-        echo json_encode(array("message" => "Unable to Create Course."));
-    }
-}

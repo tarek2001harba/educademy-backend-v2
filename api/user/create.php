@@ -9,7 +9,6 @@ header("Access-Control-Allow-Headers: *");
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json");
 
-// adding user endpoint: https://localhost/educademy/api/user/add.php?fname=&lname=&gender=&bdate=&country=&spec=&about=&type=&phone=&email=&password=
 $db = new Database();
 // the data sent from the user as JSON format
 $data = json_decode(file_get_contents("php://input"), true);

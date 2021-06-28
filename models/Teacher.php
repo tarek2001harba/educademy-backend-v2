@@ -6,7 +6,7 @@ class Teacher extends User{
     function __construct($db){
         parent::__construct($db);
         $this->conn = $db;
-        
+        $this->uid = parent::getUID();        
     }
 
     public function create(){
@@ -16,7 +16,7 @@ class Teacher extends User{
             $q = "INSERT INTO ".$this->table." (user_id) VALUE (?)";
             $stmt = $this->conn->prepare($q);
             $exec = $stmt->execute(array($this->uid));
-            $this->setTID();
+            $this->tid = $this->conn->lastInsertId();
             return $exec;
         }
         return false;
@@ -25,14 +25,17 @@ class Teacher extends User{
     public function signinAuth() {
         $user_res = parent::signinAuth();
         if($user_res){
-            $this->setTID();
+            $this->tid = $this->setTID();
             return true;
         }
         return false;
     }
     
     // gets the added teacher id for further operatoins
-    public function setTID(){
-        $this->tid = $this->conn->lastInsertId();
+    public function setTID() {
+        $q = "SELECT teacher_id FROM ".$this->table." WHERE user_id = ?";
+        $stmt = $this->conn->prepare($q);
+        $stmt->execute(array($this->uid));
+        return intval($stmt->fetch()[0]);
     }
 }
