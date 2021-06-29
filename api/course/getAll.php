@@ -4,14 +4,14 @@ include_once '../../models/Course.php';
 
 header("Access-Control-Allow-Headers: *");
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET");
+header("Access-Control-Allow-Methods: POST");
 header("Content-Type: application/json");
 
 $db = new Database();
-// $data = json_decode(file_get_contents('php://input'), true);
-// extract($data);
+$data = json_decode(file_get_contents('php://input'), true);
+extract($data);
 $course = new Course($db->getConnection());
+$courses = $course->getAll($offset, isset($filters) ? $filters : null);
 
-$courses = $course->getAll(0);
 http_response_code(200);
 echo json_encode($courses);

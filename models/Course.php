@@ -42,16 +42,20 @@ class Course{
         return $exec;
     }
 
-    // get all courses :offset = pagination var, 
-    public function getAll($offset)
+    // get all courses $offset = pagination var, 
+    public function getAll($offset, $filter = [])
     {
+        $filter_where = !empty($filter) ? $this->filter($filter) : '';
         // get courses
-        $course_q = "SELECT course_id, teacher_id as tid, course_title as title, course_desc as `description`,
-                     course_language as `language`, level_id, ctg_id,
-                     course_period as `period`, course_thumb as `thumb` FROM ".$this->table." LIMIT 10 OFFSET ".$offset;
+        $course_q = "SELECT course_id, (SELECT CONCAT_WS(' ', user_fname, user_lname) from users
+                     WHERE user_id = (SELECT user_id FROM teacher WHERE teacher_id = c.teacher_id)) as teacher, course_title as title, course_desc as `description`,
+                     course_language as `language`, 
+                     (SELECT level_name FROM skillLevel WHERE level_id = c.level_id) as level, 
+                     (SELECT ctg_name FROM category WHERE ctg_Id = c.ctg_id) as category,
+                     course_period as `period`, course_thumb as `thumb` FROM ".$this->table." as c ".$filter_where." LIMIT 10 OFFSET ".$offset;
+        // echo $course_q;
         $course_stmt = $this->conn->query($course_q);
         $courses = $course_stmt->fetchALl(PDO::FETCH_ASSOC);
-
         // get chapters query
         $chapter_q = "SELECT chapter_id , chapter_title as `title`, chapter_desc as `description` 
                      FROM chapter WHERE course_id = ?";
@@ -92,8 +96,41 @@ class Course{
                 $chapter['lessons'] = $lesson_stmt->fetchAll(PDO::FETCH_ASSOC);
             }; 
         };
-        print_r($courses);
         return $courses;
+    }
+
+    // generates the sql for filtering
+    // $filter is an array that has five params
+    // :tid (teacher_id), :level, :category,
+    // :language, :period
+    public function filter($filter)
+    {   
+        $sql = " WHERE";
+        $ind = 0;
+        foreach($filter as $k => $f){
+            if($ind > 0){
+                $sql .= " AND";
+            }
+            switch($k){
+                case "tid":
+                    $sql .= " teacher_id = ".$f;
+                    break;
+                case "level":
+                    $sql .= " level_id = ".$f;
+                    break;
+                case "category":
+                    $sql .= " ctg_id = ".$f;
+                    break;
+                case "language":
+                    $sql .= " course_language = ".$f;
+                    break;
+                default:
+                    $sql .= " course_period = ".$f;
+                    break;
+            };
+            $ind++;
+        }
+        return $sql;
     }
 
     public function enroll($student_id)

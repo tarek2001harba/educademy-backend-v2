@@ -79,9 +79,6 @@ class User{
                 $this->about = $res[10];
                 return true;
             }
-            else{
-                return false;
-            }
         }
         return false;
     }
