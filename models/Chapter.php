@@ -26,7 +26,7 @@ class Chapter{
     public function findCID($ch_name, $course){
         $q = "SELECT chapter_id FROM ".$this->table." WHERE course_id = ? AND chapter_title = ?";
         $stmt = $this->conn->prepare($q);
-        $stmt->execute(array($this->course_id, $this->chapter_title));
+        $stmt->execute(array($course, $ch_name));
         $this->chapter_id = intval($stmt->fetch()[0]);
         return $this->chapter_id;
     }

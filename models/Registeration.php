@@ -36,6 +36,15 @@ class Registeration
         return $exec;
     }
 
+    public function getClassroom()
+    {
+        $q = "SELECT course_id FROM ".$this->table." WHERE student_id = ?";
+        $stmt = $this->conn->prepare($q);
+        $stmt->execute(array($this->student_id));
+        $courses = $stmt->fetchAll(PDO::FETCH_NUM);
+        return $courses;
+    }
+
     public function allowUnenroll(){
         $q = "SELECT DATE(CURRENT_TIMESTAMP) - reg_date as date FROM ".$this->table." WHERE student_id = ? AND course_id = ?";
         $stmt = $this->conn->prepare($q);
