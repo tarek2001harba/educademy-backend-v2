@@ -3,6 +3,7 @@ class Teacher extends User{
     private $conn;
     private $table = 'teacher';
     public $tid;
+    
     function __construct($db){
         parent::__construct($db);
         $this->conn = $db;

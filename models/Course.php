@@ -52,12 +52,16 @@ class Course{
                      course_language as `language`, 
                      (SELECT level_name FROM skillLevel WHERE level_id = c.level_id) as level, 
                      (SELECT ctg_name FROM category WHERE ctg_Id = c.ctg_id) as category,
-                     course_period as `period`, course_thumb as `thumb` FROM ".$this->table." as c ".$filter_where." LIMIT 10 OFFSET ".$offset;
+                     course_period as `period`, course_thumb as `thumb`,
+                     (SELECT SUM(rating_rate)/COUNT(rating_rate) from rating where course_id = c.course_id) as `rate`, 
+                     (SELECT COUNT(*) from registration where course_id = c.course_id) as `students_num`
+                     FROM ".$this->table." as c ".$filter_where." LIMIT 10 OFFSET ".$offset;
         $res_count = $this->count($filter_where);
         $course_stmt = $this->conn->query($course_q);
         $courses = $course_stmt->fetchALl(PDO::FETCH_ASSOC);
         foreach($courses as &$course){
             $course['period'] .= intval($course['period']) === 1 ? " Month" : " Months";
+            $course['students_num'] = intval($course['students_num']);
         }
         return [$res_count, $courses];
     }
@@ -76,6 +80,20 @@ class Course{
         $this->createCourseRes($course);
         return $course;
     }
+
+    public function getTeacherCourses()
+    {
+        $course_q = "SELECT course_id as cid, (SELECT CONCAT_WS(' ', user_fname, user_lname) from users
+                     WHERE user_id = (SELECT user_id FROM teacher WHERE teacher_id = c.teacher_id)) as teacher, course_title as title, course_desc as `description`,
+                     course_language as `language`, 
+                     (SELECT level_name FROM skillLevel WHERE level_id = c.level_id) as level, 
+                     (SELECT ctg_name FROM category WHERE ctg_Id = c.ctg_id) as category,
+                     course_period as `period`, course_thumb as `thumb` FROM ".$this->table." as c WHERE teacher_id = ".$this->course_teacher;
+        $course_stmt = $this->conn->query($course_q);
+        $course = $course_stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $course;
+    }
+
     // generates the sql for filtering
     // $filter is an array that has five params
     // :tid (teacher_id), :level, :category,

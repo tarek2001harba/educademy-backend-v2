@@ -110,6 +110,6 @@ class User{
     }
     // getters
     public function getUID(){
-        return $this->uid;
+        return intval($this->uid);
     }
 }

@@ -31,9 +31,17 @@ class Rating{
         $q = "SELECT COUNT(*) as num, rating_id as id, rating_rate as rate, rating_comment as comment FROM ".$this->table." WHERE student_id = ? AND course_id = ?";
         $stmt = $this->conn->prepare($q);
         $stmt->execute(array($this->student_id, $this->course_id));
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
     
+    // public function getCourseRating()
+    // {
+    //     $q = "SELECT  FROM ".$this->table." WHERE student_id = ? AND course_id = ?";
+    //     $stmt = $this->conn->prepare($q);
+    //     $stmt->execute(array($this->student_id, $this->course_id));
+    //     return $stmt->fetch(PDO::FETCH_ASSOC);
+    // }
+
     public function countRows(){
         $count_q = "SELECT COUNT(*) FROM ".$this->table." WHERE student_id = ? AND course_id = ?";
         $stmt = $this->conn->prepare($count_q);

@@ -1,18 +1,18 @@
 <?php
 // checks when adding smoething and sends the right reponse and message
 function check_create($create_res, $object, $created_name){
-    if($create_res === true){
+    if($create_res){
         http_response_code(201);
         $udata = array(
                 "message" => $created_name." Created Successfully.",
-                "uid" => $object->uid,
+                "uid" => intval($object->uid),
                 "join_date" => $object->join_date,
         );
         if($object->type === "Teacher"){
-            $udata["tid"] = $object->tid;
+            $udata["tid"] = intval($object->tid);
         }
         else{
-            $udata["sid"] = $object->sid;
+            $udata["sid"] = intval($object->sid);
         }
         echo json_encode($udata);
     }
@@ -23,11 +23,11 @@ function check_create($create_res, $object, $created_name){
 }
 
 function checkSigninAuth($create_res, $object){
-    if($create_res === true){
+    if($create_res){
         http_response_code(200); // OK
         $udata = array(
             "message" => "Loged in to account Successfully.",
-            "uid" => $object->uid,
+            "uid" => intval($object->uid),
             "fname" => $object->fname,
             "lname" => $object->lname,
             "phone" => $object->phone,
@@ -41,10 +41,10 @@ function checkSigninAuth($create_res, $object){
             "about" => $object->about
         );
         if($object->type === "Teacher"){
-            $udata["tid"] = $object->tid;
+            $udata["tid"] = intval($object->tid);
         }
         else{
-            $udata["sid"] = $object->sid;
+            $udata["sid"] = intval($object->sid);
         }
         echo json_encode($udata);
     }

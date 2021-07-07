@@ -28,4 +28,15 @@ class Lesson{
         ));
         return $exec;
     }
+
+    public function get()
+    {
+        $q = "SELECT lesson_id as lid, chapter_id as chid, lesson_title as title, lesson_content as content, 
+                lesson_resource as resources, lesson_video as video,
+                (SELECT count(*) FROM lesson WHERE chapter_id = l.chapter_id) as nav_lessons,
+                (SELECT lesson_id FROM lesson WHERE chapter_id = l.chapter_id LIMIT 1) as nav_flesson FROM ".$this->table." as l WHERE lesson_id = ?";
+        $stmt = $this->conn->prepare($q);
+        $stmt->execute(array($this->lesson_id));
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 }

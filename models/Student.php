@@ -3,12 +3,13 @@ class Student extends User{
     private $conn;
     private $table = 'student';
     public $sid;
-    public $sub_id;
     
     function __construct($db){
         parent::__construct($db);
         $this->conn = $db;
+        $this->uid = parent::getUID();
     }
+
     public function create(){
         $user_res = parent::create();
         // if user was added successfully then it will add it to teacher table
@@ -16,7 +17,7 @@ class Student extends User{
             $q = "INSERT INTO ".$this->table." (user_id) VALUE (?)";
             $stmt = $this->conn->prepare($q);
             $exec = $stmt->execute(array($this->uid));
-            $this->setSID();
+            $this->sid = $this->conn->lastInsertId();
             return $exec;
         }
         return false;
@@ -25,13 +26,17 @@ class Student extends User{
     public function signinAuth() {
         $user_res = parent::signinAuth();
         if($user_res){
-            $this->setSID();
+            $this->sid = $this->setSID();
             return true;
         }
         return false;
     }
+
     // gets the added teacher id for further operatoins
     public function setSID(){
-        $this->sid = $this->conn->lastInsertId();
+        $q = "SELECT student_id FROM ".$this->table." WHERE user_id = ?";
+        $stmt = $this->conn->prepare($q);
+        $stmt->execute(array($this->uid));
+        return intval($stmt->fetchColumn());
     }
 }

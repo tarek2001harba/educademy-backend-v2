@@ -14,17 +14,15 @@ $rating = new Rating($db->getConnection());
 $rating->student_id = $sid;
 $rating->course_id = $cid;
 $rating_res = $rating->getRating();
-if($rating_res['num'] === 0) {
-    http_response_code(404);
-    echo json_encode(array('message' => "Has Not Rated Before.", "rated" => false));
+http_response_code(200);
+if(intval($rating_res['num']) === 0) {
+    echo json_encode(array('message' => "Has Not Rated Before."));
 } 
 else {
-    http_response_code(200);
+    $rating_res['id'] = intval($rating_res['id']);
+    $rating_res['rate'] = intval($rating_res['rate']);
     echo json_encode(array(
         'message' => "Already Rated.", 
-        'rid' => intval($rating_res['id']),
-        'rate' => intval($rating_res['rate']),
-        'comment' => $rating_res['comment'],
-        'rated' => true
+        'result' => $rating_res
     ));
 }

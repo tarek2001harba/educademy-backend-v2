@@ -17,7 +17,7 @@ $rating->rating_comment = $comment;
 $rating->rating_rate = $rate;
 if($rating->create()){
     http_response_code(200);
-    echo json_encode(array('message' => "Successful Rating."));
+    echo json_encode(array('message' => "Successful Rating. rate".$rate));
 } else{
     http_response_code(503);
     echo json_encode(array('message' => "Unable to rate this course."));
