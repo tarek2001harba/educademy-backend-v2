@@ -11,6 +11,11 @@ $db = new Database();
 $data = json_decode(file_get_contents('php://input'), true);
 extract($data);
 $course = new Course($db->getConnection());
+$up = 1;
+
+if($_SERVER["HTTP_ORIGIN"] == "http://localhost:3005" && isset($uploaded)){
+    $up = $uploaded === "Approved" ? 1 : ($uploaded === "Declined" ? 2 : 0);
+}
 
 // setting the proper sql comparison for period filter
 if(isset($filters['period'])){
@@ -33,7 +38,7 @@ if(isset($filters['period'])){
     }
 }
 
-$res = $course->getAll($offset, isset($filters) ? $filters : null);
+$res = $course->getAll($offset, $up, isset($filters) ? $filters : null);
 $count = $res[0];
 $courses = $res[1];
 http_response_code(200);

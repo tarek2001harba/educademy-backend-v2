@@ -57,7 +57,7 @@ class User{
     
     public function signinAuth(){
         if(!$this->checkAvalUser()){
-            $pwd_q = "SELECT user_pwd, user_id, user_fname, user_lname, user_phone,
+            $pwd_q = "SELECT  user_pwd, user_id as uid, user_fname, user_lname, user_phone,
                              user_country, user_spec, gender_id, user_bdate,
                              join_date, user_about
                     FROM ".$this->table." WHERE user_email = ?";
@@ -83,12 +83,58 @@ class User{
         return false;
     }
 
+    // get all users $offset = pagination var, 
+    public function getAll($offset, $filter = [])
+    {
+        $filter_where = !empty($filter) ? $this->filter($filter) : '';
+        // get users
+        $user_q = "SELECT user_id as uid, CONCAT_WS(' ', user_fname, user_lname) as name, user_email as email,
+                    user_phone as phone, user_country as country, user_spec as spec, gender_id as gender, 
+                    user_bdate as bdate, join_date, user_about as about, user_type as type
+                    FROM ".$this->table." as c ".$filter_where." LIMIT 10 OFFSET ".$offset;
+        $res_count = $this->countRows($filter_where);
+        $user_stmt = $this->conn->query($user_q);
+        $courses = $user_stmt->fetchALl(PDO::FETCH_ASSOC);
+        return [$res_count, $courses];
+    }
+
+    // generates the sql for filtering
+    // $filter is an array that has five params
+    // :gender, :spec,
+    // :type, :age
+    public function filter($filter)
+    {   
+        $sql = " WHERE";
+        $ind = 0;
+        foreach($filter as $k => $f){
+            if($ind > 0){
+                $sql .= " AND";
+            }
+            switch($k){
+                case "gender":
+                    $sql .= " gender_id = ".$f;
+                    break;
+                case "spec":
+                    $sql .= " user_spec = (SELECT ctg_id FROM category WHERE ctg_name = ".$f.")";
+                    break;
+                case "type":
+                    $sql .= " user_type = '".$f."'";
+                    break;
+                default:
+                    $sql .= " YEAR(user_bdate) - YEAR(CURDATE()) ".$f;
+                    break;
+            };
+            $ind++;
+        }
+        return $sql;
+    }
+
     // check if user email already exists and updates type for further operations
     public function checkAvalUser(){
         $check_email_q = "SELECT user_type FROM `".$this->table."` WHERE user_email = ?";
         $check = $this->conn->prepare($check_email_q);
         $check->execute(array($this->email));
-        if($this->countRows("user_email = '".$this->email."'") === 0){
+        if($this->countRows("WHERE user_email = '".$this->email."'") === 0){
             return true;
         }
         // if user already exists then get the type
@@ -96,8 +142,8 @@ class User{
         return false;
     }
 
-    public function countRows($where_criteria){
-        $count_q = "SELECT COUNT(*) FROM ".$this->table." WHERE ".$where_criteria;
+    public function countRows($where_criteria = ""){
+        $count_q = "SELECT COUNT(*) FROM ".$this->table." ".$where_criteria;
         $count = $this->conn->query($count_q)->fetchColumn();
         return intval($count);
     }

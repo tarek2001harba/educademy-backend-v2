@@ -27,5 +27,4 @@ if(!$user->checkAvalUser()){ // checks if email exists
         $student->password = $password;
         checkSigninAuth($student->signinAuth(), $student);
     }
-    
 }
